@@ -193,6 +193,13 @@ function ConversationCard(props) {
       }
       setIsReady(true)
     }
+    if (msg.hello) {
+      const newAnswer = new ConversationItemData('answer', `${msg.hello}`)
+      setConversationItemData([...conversationItemData, newAnswer])
+      const newSession = { ...session, answer: msg.hello, isRetry: false }
+      setSession(newSession)
+      setIsReady(true)
+    }
   }
 
   const foregroundMessageListeners = useRef([])
