@@ -5,22 +5,11 @@ import ReadButton from '../ReadButton'
 import PropTypes from 'prop-types'
 import MarkdownRender from '../MarkdownRender/markdown.jsx'
 import { useTranslation } from 'react-i18next'
-import { isUsingCustomModel } from '../../config/index.mjs'
-import { useConfig } from '../../hooks/use-config.mjs'
 
 function AnswerTitle({ descName, modelName }) {
-  const { t } = useTranslation()
-  const config = useConfig()
-
-  return (
-    <p style="white-space: nowrap;">
-      {descName && modelName
-        ? `${t(descName)}${
-            isUsingCustomModel({ modelName }) ? ' (' + config.customModelName + ')' : ''
-          }:`
-        : t('Loading...')}
-    </p>
-  )
+  let a = descName + modelName
+  a = 'BizCopilot'
+  return <p style="white-space: nowrap;">{a}</p>
 }
 
 AnswerTitle.propTypes = {

@@ -320,9 +320,9 @@ try {
       path: 'IndependentPanel.html',
       enabled: true,
     })
-    if (tab.status == 'complete' && currentPort != null) {
-      let h = '<p>您正在查看：' + tab.title + '</p>'
-      currentPort.postMessage({ hello: h })
+    if (tab.url != currentUrl) {
+      currentUrl = tab.url
+      currentPort.postMessage({ hello: '<p>您正在查看：' + tab.title + '</p>' })
     }
   })
 } catch (error) {
@@ -334,6 +334,7 @@ registerCommands()
 refreshMenu()
 
 let currentPort = null
+let currentUrl = null
 Browser.runtime.onConnect.addListener((port) => {
   currentPort = port
   console.log('port changed')

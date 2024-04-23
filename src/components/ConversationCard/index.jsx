@@ -4,23 +4,17 @@ import Browser from 'webextension-polyfill'
 import InputBox from '../InputBox'
 import ConversationItem from '../ConversationItem'
 import { createElementAtPosition, isFirefox, isMobile, isSafari } from '../../utils'
-import {
-  ArchiveIcon,
-  DesktopDownloadIcon,
-  LinkExternalIcon,
-  MoveToBottomIcon,
-} from '@primer/octicons-react'
+import { LinkExternalIcon, MoveToBottomIcon } from '@primer/octicons-react'
 import { Pin, WindowDesktop, XLg } from 'react-bootstrap-icons'
-import FileSaver from 'file-saver'
+
 import { render } from 'preact'
 import FloatingToolbar from '../FloatingToolbar'
 import { useClampWindowSize } from '../../hooks/use-clamp-window-size'
-import { bingWebModelKeys, getUserConfig, ModelMode, Models } from '../../config/index.mjs'
+import { bingWebModelKeys, getUserConfig } from '../../config/index.mjs'
 import { useTranslation } from 'react-i18next'
 import DeleteButton from '../DeleteButton'
 import { useConfig } from '../../hooks/use-config.mjs'
-import { createSession } from '../../services/local-session.mjs'
-import { v4 as uuidv4 } from 'uuid'
+
 import { initSession } from '../../services/init-session.mjs'
 import { findLastIndex } from 'lodash-es'
 import { generateAnswersWithBingWebApi } from '../../services/apis/bing-web.mjs'
@@ -347,39 +341,6 @@ function ConversationCard(props) {
           ) : (
             <img src={logo} style="user-select:none;width:20px;height:20px;" />
           )}
-          <select
-            style={props.notClampSize ? {} : { width: 0, flexGrow: 1 }}
-            className="normal-button"
-            required
-            onChange={(e) => {
-              const modelName = e.target.value
-              const newSession = { ...session, modelName, aiName: Models[modelName].desc }
-              if (config.autoRegenAfterSwitchModel && conversationItemData.length > 0)
-                getRetryFn(newSession)()
-              else setSession(newSession)
-            }}
-          >
-            {config.activeApiModes.map((modelName) => {
-              let desc
-              if (modelName.includes('-')) {
-                const splits = modelName.split('-')
-                if (splits[0] in Models)
-                  desc = `${t(Models[splits[0]].desc)} (${t(ModelMode[splits[1]])})`
-              } else {
-                if (modelName in Models) desc = t(Models[modelName].desc)
-              }
-              if (desc)
-                return (
-                  <option
-                    value={modelName}
-                    key={modelName}
-                    selected={modelName === session.modelName}
-                  >
-                    {desc}
-                  </option>
-                )
-            })}
-          </select>
         </span>
         {props.draggable && !completeDraggable && (
           <div className="draggable" style={{ flexGrow: 2, cursor: 'move', height: '55px' }} />
@@ -445,31 +406,6 @@ function ConversationCard(props) {
               setSession(newSession)
             }}
           />
-          {!props.pageMode && (
-            <span
-              title={t('Store to Independent Conversation Page')}
-              className="gpt-util-icon"
-              onClick={() => {
-                const newSession = {
-                  ...session,
-                  sessionName: new Date().toLocaleString(),
-                  autoClean: false,
-                  sessionId: uuidv4(),
-                }
-                setSession(newSession)
-                createSession(newSession).then(() =>
-                  Browser.runtime.sendMessage({
-                    type: 'OPEN_URL',
-                    data: {
-                      url: Browser.runtime.getURL('IndependentPanel.html') + '?from=store',
-                    },
-                  }),
-                )
-              }}
-            >
-              <ArchiveIcon size={16} />
-            </span>
-          )}
           {conversationItemData.length > 0 && (
             <span
               title={t('Jump to bottom')}
@@ -484,22 +420,6 @@ function ConversationCard(props) {
               <MoveToBottomIcon size={16} />
             </span>
           )}
-          <span
-            title={t('Save Conversation')}
-            className="gpt-util-icon"
-            onClick={() => {
-              let output = ''
-              session.conversationRecords.forEach((data) => {
-                output += `${t('Question')}:\n\n${data.question}\n\n${t('Answer')}:\n\n${
-                  data.answer
-                }\n\n<hr/>\n\n`
-              })
-              const blob = new Blob([output], { type: 'text/plain;charset=utf-8' })
-              FileSaver.saveAs(blob, 'conversation.md')
-            }}
-          >
-            <DesktopDownloadIcon size={16} />
-          </span>
         </span>
       </div>
       <hr />
