@@ -24,7 +24,7 @@ export async function generateAnswersWithAzureOpenaiApi(port, question, session)
   await fetchSSE(
     `${config.azureEndpoint.replace(/\/$/, '')}/openai/deployments/${
       config.azureDeploymentName
-    }/chat/completions?api-version=2023-05-15`,
+    }/chat/completions?api-version=2024-02-15-preview`,
     {
       method: 'POST',
       signal: controller.signal,
@@ -39,7 +39,7 @@ export async function generateAnswersWithAzureOpenaiApi(port, question, session)
         temperature: config.temperature,
       }),
       onMessage(message) {
-        console.debug('sse message', message)
+        if (message == '[DONE]') return
         let data
         try {
           data = JSON.parse(message)
@@ -47,6 +47,7 @@ export async function generateAnswersWithAzureOpenaiApi(port, question, session)
           console.debug('json error', error)
           return
         }
+        if (data.choices.length == 0) return
         if ('content' in data.choices[0].delta) {
           answer += data.choices[0].delta.content
           port.postMessage({ answer: answer, done: false, session: null })

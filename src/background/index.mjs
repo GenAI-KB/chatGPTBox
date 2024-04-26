@@ -320,9 +320,15 @@ try {
       path: 'IndependentPanel.html',
       enabled: true,
     })
-    if (tab.url != currentUrl) {
+    if (currentPort != null && tab.url != currentUrl) {
       currentUrl = tab.url
-      currentPort.postMessage({ hello: '<p>您正在查看：' + tab.title + '</p>' })
+      //  let  newSession=  initSession({ modelName: (await getUserConfig()).modelName , question: "hello"})
+      // const config = await getUserConfig()
+      //  await executeApi(newSession, currentPort, config)
+      //  newSession.conversationRecords.push({ question: "hello" })
+      //  currentPort.postMessage({ hello: '<p>您正在查看：' + tab.title + '</p>' })
+
+      //currentPort.postMessage({ command: `summary` })
     }
   })
 } catch (error) {

@@ -19,6 +19,7 @@ import { initSession } from '../../services/init-session.mjs'
 import { findLastIndex } from 'lodash-es'
 import { generateAnswersWithBingWebApi } from '../../services/apis/bing-web.mjs'
 import { handlePortError } from '../../services/wrappers.mjs'
+import { getCoreContentText } from '../../utils/get-core-content-text'
 
 const logo = Browser.runtime.getURL('logo.png')
 
@@ -75,6 +76,36 @@ function ConversationCard(props) {
 
   useEffect(() => {
     setCompleteDraggable(!isSafari() && !isFirefox() && !isMobile())
+    console.debug('useEffect', '')
+    Browser.runtime.onMessage.addListener((msg) => {
+      if (msg.prompt != null) {
+        let question = msg.prompt.question
+        const newQuestion = new ConversationItemData('question', question)
+        let ans = '正在为您生成这篇文章的摘要...'
+        if (msg.prompt.type == 'desc') ans = '正在根据故障现象检索可能的故障题原因'
+        if (msg.prompt.type == 'anay') ans = '正在根据故障原因检索可能的解决方案'
+        const newAnswer = new ConversationItemData('answer', `<p class="gpt-loading">${t(ans)}</p>`)
+        if (msg.showQuestion) {
+          setConversationItemData([...conversationItemData, newQuestion, newAnswer])
+        } else {
+          setConversationItemData([...conversationItemData, newAnswer])
+        }
+
+        setIsReady(false)
+        const newSession = initSession({
+          ...session,
+          question: question,
+          isRetry: false,
+        })
+
+        setSession(newSession)
+        try {
+          postMessage({ session: newSession })
+        } catch (e) {
+          updateAnswer(e, false, 'error')
+        }
+      }
+    })
   }, [])
 
   useEffect(() => {
@@ -193,6 +224,51 @@ function ConversationCard(props) {
       const newSession = { ...session, answer: msg.hello, isRetry: false }
       setSession(newSession)
       setIsReady(true)
+    }
+    if (msg.question) {
+      const newQuestion = new ConversationItemData('question', msg.question)
+      const newAnswer = new ConversationItemData(
+        'answer',
+        `<p class="gpt-loading">${t('Waiting for response...')}</p>`,
+      )
+      if (msg.showQuestion) {
+        setConversationItemData([...conversationItemData, newQuestion, newAnswer])
+      } else {
+        setConversationItemData([...conversationItemData, newAnswer])
+      }
+
+      setIsReady(false)
+
+      const newSession = { ...session, question: msg.question, isRetry: false }
+      setSession(newSession)
+      try {
+        postMessage({ session: newSession })
+      } catch (e) {
+        updateAnswer(e, false, 'error')
+      }
+    }
+    if (msg.command) {
+      let question = `The following is the text content of a web page, analyze the core content and summarize:\n${getCoreContentText()}`
+      const newQuestion = new ConversationItemData('question', question)
+      const newAnswer = new ConversationItemData(
+        'answer',
+        `<p class="gpt-loading">${t('Waiting for response...')}</p>`,
+      )
+      if (msg.showQuestion) {
+        setConversationItemData([...conversationItemData, newQuestion, newAnswer])
+      } else {
+        setConversationItemData([...conversationItemData, newAnswer])
+      }
+
+      setIsReady(false)
+
+      const newSession = { ...session, question: question, isRetry: false }
+      setSession(newSession)
+      try {
+        postMessage({ session: newSession })
+      } catch (e) {
+        updateAnswer(e, false, 'error')
+      }
     }
   }
 
