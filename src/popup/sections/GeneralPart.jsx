@@ -19,7 +19,6 @@ import {
 import Browser from 'webextension-polyfill'
 import { languageList } from '../../config/language.mjs'
 import PropTypes from 'prop-types'
-import { config as menuConfig } from '../../content-script/menu-tools'
 
 GeneralPart.propTypes = {
   config: PropTypes.object.isRequired,
@@ -404,93 +403,6 @@ export function GeneralPart({ config, updateConfig }) {
             )
           })}
         </select>
-      </label>
-      <label>
-        <legend>{t('When Icon Clicked')}</legend>
-        <select
-          required
-          onChange={(e) => {
-            const mode = e.target.value
-            updateConfig({ clickIconAction: mode })
-          }}
-        >
-          <option value="popup" key="popup" selected={config.clickIconAction === 'popup'}>
-            {t('Open Settings')}
-          </option>
-          {Object.entries(menuConfig).map(([k, v]) => {
-            return (
-              <option value={k} key={k} selected={k === config.clickIconAction}>
-                {t(v.label)}
-              </option>
-            )
-          })}
-        </select>
-      </label>
-      <label>
-        <input
-          type="checkbox"
-          checked={config.insertAtTop}
-          onChange={(e) => {
-            const checked = e.target.checked
-            updateConfig({ insertAtTop: checked })
-          }}
-        />
-        {t('Insert ChatGPT at the top of search results')}
-      </label>
-      <label>
-        <input
-          type="checkbox"
-          checked={config.lockWhenAnswer}
-          onChange={(e) => {
-            const checked = e.target.checked
-            updateConfig({ lockWhenAnswer: checked })
-          }}
-        />
-        {t('Lock scrollbar while answering')}
-      </label>
-      <label>
-        <input
-          type="checkbox"
-          checked={config.autoRegenAfterSwitchModel}
-          onChange={(e) => {
-            const checked = e.target.checked
-            updateConfig({ autoRegenAfterSwitchModel: checked })
-          }}
-        />
-        {t('Regenerate the answer after switching model')}
-      </label>
-      <label>
-        <input
-          type="checkbox"
-          checked={config.selectionToolsNextToInputBox}
-          onChange={(e) => {
-            const checked = e.target.checked
-            updateConfig({ selectionToolsNextToInputBox: checked })
-          }}
-        />
-        {t('Display selection tools next to input box to avoid blocking')}
-      </label>
-      <label>
-        <input
-          type="checkbox"
-          checked={config.alwaysPinWindow}
-          onChange={(e) => {
-            const checked = e.target.checked
-            updateConfig({ alwaysPinWindow: checked })
-          }}
-        />
-        {t('Always pin the floating window')}
-      </label>
-      <label>
-        <input
-          type="checkbox"
-          checked={config.focusAfterAnswer}
-          onChange={(e) => {
-            const checked = e.target.checked
-            updateConfig({ focusAfterAnswer: checked })
-          }}
-        />
-        {t('Focus to input box after answering')}
       </label>
       <br />
     </>

@@ -190,7 +190,7 @@ export const defaultConfig = {
   /** @type {keyof ThemeMode}*/
   themeMode: 'auto',
   /** @type {keyof Models}*/
-  modelName: 'chatgptFree35',
+  modelName: 'azureOpenAi',
 
   preferredLanguage: getNavigatorLanguage(),
   clickIconAction: 'popup',
@@ -243,18 +243,7 @@ export const defaultConfig = {
   // others
 
   alwaysCreateNewConversationWindow: false,
-  activeApiModes: [
-    'chatgptFree35',
-    'chatgptPlus4',
-    'chatgptApi35',
-    'chatgptApi4_8k',
-    'claude2WebFree',
-    'bingFree4',
-    'moonshotWebFree',
-    'chatglmTurbo',
-    'customModel',
-    'azureOpenAi',
-  ],
+  activeApiModes: ['chatgptApi35', 'chatgptApi4_8k', 'azureOpenAi'],
   activeSelectionTools: ['translate', 'summary', 'polish', 'code', 'ask'],
   activeSiteAdapters: [
     'bilibili',

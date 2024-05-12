@@ -9,59 +9,18 @@ import {
 import { Tab, TabList, TabPanel, Tabs } from 'react-tabs'
 import 'react-tabs/style/react-tabs.css'
 import './styles.scss'
-import { MarkGithubIcon } from '@primer/octicons-react'
 import Browser from 'webextension-polyfill'
 import { useWindowTheme } from '../hooks/use-window-theme.mjs'
 import { isMobile } from '../utils/index.mjs'
 import { useTranslation } from 'react-i18next'
 import { GeneralPart } from './sections/GeneralPart'
-import { FeaturePages } from './sections/FeaturePages'
 import { AdvancedPart } from './sections/AdvancedPart'
-import { ModulesPart } from './sections/ModulesPart'
-
-// eslint-disable-next-line react/prop-types
-function Footer({ currentVersion, latestVersion }) {
-  const { t } = useTranslation()
-
-  return (
-    <div className="footer">
-      <div>
-        {`${t('Current Version')}: ${currentVersion} `}
-        {currentVersion >= latestVersion ? (
-          `(${t('Latest')})`
-        ) : (
-          <>
-            ({`${t('Latest')}: `}
-            <a
-              href={'https://github.com/josStorer/chatGPTBox/releases/tag/v' + latestVersion}
-              target="_blank"
-              rel="nofollow noopener noreferrer"
-            >
-              {latestVersion}
-            </a>
-            )
-          </>
-        )}
-      </div>
-      <div>
-        <a
-          href="https://github.com/josStorer/chatGPTBox"
-          target="_blank"
-          rel="nofollow noopener noreferrer"
-        >
-          <span>{t('Help | Changelog ')}</span>
-          <MarkGithubIcon />
-        </a>
-      </div>
-    </div>
-  )
-}
 
 function Popup() {
   const { t, i18n } = useTranslation()
   const [config, setConfig] = useState(defaultConfig)
-  const [currentVersion, setCurrentVersion] = useState('')
-  const [latestVersion, setLatestVersion] = useState('')
+  const [setCurrentVersion] = useState('')
+  const [setLatestVersion] = useState('')
   const theme = useWindowTheme()
 
   const updateConfig = async (value) => {
@@ -97,19 +56,10 @@ function Popup() {
         <Tabs selectedTabClassName="popup-tab--selected">
           <TabList>
             <Tab className="popup-tab">{t('General')}</Tab>
-            <Tab className="popup-tab">{t('Feature Pages')}</Tab>
-            <Tab className="popup-tab">{t('Modules')}</Tab>
             <Tab className="popup-tab">{t('Advanced')}</Tab>
           </TabList>
-
           <TabPanel>
             <GeneralPart config={config} updateConfig={updateConfig} />
-          </TabPanel>
-          <TabPanel>
-            <FeaturePages config={config} updateConfig={updateConfig} />
-          </TabPanel>
-          <TabPanel>
-            <ModulesPart config={config} updateConfig={updateConfig} />
           </TabPanel>
           <TabPanel>
             <AdvancedPart config={config} updateConfig={updateConfig} />
@@ -117,7 +67,6 @@ function Popup() {
         </Tabs>
       </form>
       <br />
-      <Footer currentVersion={currentVersion} latestVersion={latestVersion} />
     </div>
   )
 }

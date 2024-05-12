@@ -15,6 +15,7 @@
     "contextMenus",
     "unlimitedStorage",
     "tabs",
+    "activeTab",
     "webRequest",
     "https://*.openai.com/",
     "https://*.bing.com/",

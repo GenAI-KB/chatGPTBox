@@ -48,6 +48,7 @@ import { generateAnswersWithBardWebApi } from '../services/apis/bard-web.mjs'
 import { generateAnswersWithClaudeWebApi } from '../services/apis/claude-web.mjs'
 import { generateAnswersWithMoonshotCompletionApi } from '../services/apis/moonshot-api.mjs'
 import { generateAnswersWithMoonshotWebApi } from '../services/apis/moonshot-web.mjs'
+import { pushRecord } from '../services/apis/shared.mjs'
 
 function setPortProxy(port, proxyTabId) {
   port.proxy = Browser.tabs.connect(proxyTabId)
@@ -71,10 +72,51 @@ function setPortProxy(port, proxyTabId) {
   port.proxy.onDisconnect.addListener(proxyOnDisconnect)
   port.onDisconnect.addListener(portOnDisconnect)
 }
-
+async function getCurrentTab() {
+  let queryOptions = { active: true, lastFocusedWindow: true }
+  // `tab` will either be a `tabs.Tab` instance or `undefined`.
+  let [tab] = await Browser.tabs.query(queryOptions)
+  return tab
+}
 async function executeApi(session, port, config) {
   console.debug('modelName', session.modelName)
-  if (chatgptWebModelKeys.includes(session.modelName)) {
+  let currTab = await getCurrentTab()
+  console.debug('currTab', currTab)
+  let shopurl = 'https://localhost:7298/'
+  if (currTab != null && currTab.url.startsWith(shopurl)) {
+    let question = session.question
+    let response = await fetch(`${shopurl}api/copilot?q=${question}&sessionId=${session.sessionId}`)
+    if (response.ok) {
+      let answer = await response.json()
+      let index = answer.indexOf('{"question')
+      if (index != -1) {
+        let info = answer.substring(index)
+        answer = answer.substring(0, index)
+        let url = shopurl
+        let q1 = JSON.parse(info)
+        let q = q1.question
+        if (q.brandId) {
+          let t = Number(q.brandId)
+          if (!isNaN(t)) url += `?brand=${q.brandId}`
+        }
+        if (q.productId) {
+          let t = Number(q.productId)
+          if (!isNaN(t)) url += `item/${q.productId}`
+        }
+        if (q.typeId) {
+          let t = Number(q.typeId)
+          if (!isNaN(t)) url += `?type=${q.typeId}`
+        }
+        if (q.basket) {
+          url += `cart`
+        }
+        if (url != shopurl) Browser.tabs.update(currTab.id, { url: url })
+      }
+
+      pushRecord(session, question, answer)
+      port.postMessage({ answer: answer, done: true, session: session })
+    }
+  } else if (chatgptWebModelKeys.includes(session.modelName)) {
     let tabId
     if (
       config.chatgptTabId &&
@@ -314,22 +356,13 @@ try {
 
   Browser.tabs.onUpdated.addListener(async (tabId, info, tab) => {
     if (!tab.url) return
+    console.debug('tabs.onUpdated', tab.url)
     // eslint-disable-next-line no-undef
     await chrome.sidePanel.setOptions({
       tabId,
       path: 'IndependentPanel.html',
       enabled: true,
     })
-    if (currentPort != null && tab.url != currentUrl) {
-      currentUrl = tab.url
-      //  let  newSession=  initSession({ modelName: (await getUserConfig()).modelName , question: "hello"})
-      // const config = await getUserConfig()
-      //  await executeApi(newSession, currentPort, config)
-      //  newSession.conversationRecords.push({ question: "hello" })
-      //  currentPort.postMessage({ hello: '<p>您正在查看：' + tab.title + '</p>' })
-
-      //currentPort.postMessage({ command: `summary` })
-    }
   })
 } catch (error) {
   console.log(error)
@@ -338,10 +371,3 @@ try {
 registerPortListener(async (session, port, config) => await executeApi(session, port, config))
 registerCommands()
 refreshMenu()
-
-let currentPort = null
-let currentUrl = null
-Browser.runtime.onConnect.addListener((port) => {
-  currentPort = port
-  console.log('port changed')
-})

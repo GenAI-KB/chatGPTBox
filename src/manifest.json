@@ -24,6 +24,7 @@
     "contextMenus",
     "unlimitedStorage",
     "tabs",
+    "activeTab",
     "webRequest",
     "declarativeNetRequestWithHostAccess",
     "sidePanel"

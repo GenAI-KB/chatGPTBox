@@ -365,10 +365,8 @@ async function run() {
       changeLanguage(data.lang)
     }
   })
-
   window.addEventListener('load', () => {
     if (document.URL.startsWith('https://restofworld.org')) {
-      console.debug('asd', document.URL)
       // 发送消息给插件的后台页面
       Browser.runtime.sendMessage({
         prompt: {

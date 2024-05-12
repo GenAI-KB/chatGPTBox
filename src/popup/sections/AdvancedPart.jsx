@@ -229,18 +229,9 @@ export function AdvancedPart({ config, updateConfig }) {
       <Tabs selectedTabClassName="popup-tab--selected">
         <TabList>
           <Tab className="popup-tab">{t('API Params')}</Tab>
-          <Tab className="popup-tab">{t('API Url')}</Tab>
-          <Tab className="popup-tab">{t('Others')}</Tab>
         </TabList>
-
         <TabPanel>
           <ApiParams config={config} updateConfig={updateConfig} />
-        </TabPanel>
-        <TabPanel>
-          <ApiUrl config={config} updateConfig={updateConfig} />
-        </TabPanel>
-        <TabPanel>
-          <Others config={config} updateConfig={updateConfig} />
         </TabPanel>
       </Tabs>
     </>

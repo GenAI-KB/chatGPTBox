@@ -76,34 +76,32 @@ function ConversationCard(props) {
 
   useEffect(() => {
     setCompleteDraggable(!isSafari() && !isFirefox() && !isMobile())
-    console.debug('useEffect', '')
     Browser.runtime.onMessage.addListener((msg) => {
-      if (msg.prompt != null) {
-        let question = msg.prompt.question
-        const newQuestion = new ConversationItemData('question', question)
-        let ans = '正在为您生成这篇文章的摘要...'
-        if (msg.prompt.type == 'desc') ans = '正在根据故障现象检索可能的故障题原因'
-        if (msg.prompt.type == 'anay') ans = '正在根据故障原因检索可能的解决方案'
-        const newAnswer = new ConversationItemData('answer', `<p class="gpt-loading">${t(ans)}</p>`)
-        if (msg.showQuestion) {
-          setConversationItemData([...conversationItemData, newQuestion, newAnswer])
-        } else {
-          setConversationItemData([...conversationItemData, newAnswer])
-        }
+      if (msg.prompt == null) return
+      let question = msg.prompt.question
+      const newQuestion = new ConversationItemData('question', question)
+      let ans = '正在为您生成这篇文章的摘要...'
+      if (msg.prompt.type == 'desc') ans = '正在根据故障现象检索可能的故障题原因'
+      if (msg.prompt.type == 'anay') ans = '正在根据故障原因检索可能的解决方案'
+      const newAnswer = new ConversationItemData('answer', `<p class="gpt-loading">${t(ans)}</p>`)
+      if (msg.showQuestion) {
+        setConversationItemData([...conversationItemData, newQuestion, newAnswer])
+      } else {
+        setConversationItemData([...conversationItemData, newAnswer])
+      }
 
-        setIsReady(false)
-        const newSession = initSession({
-          ...session,
-          question: question,
-          isRetry: false,
-        })
+      setIsReady(false)
+      const newSession = initSession({
+        ...session,
+        question: question,
+        isRetry: false,
+      })
 
-        setSession(newSession)
-        try {
-          postMessage({ session: newSession })
-        } catch (e) {
-          updateAnswer(e, false, 'error')
-        }
+      setSession(newSession)
+      try {
+        postMessage({ session: newSession })
+      } catch (e) {
+        updateAnswer(e, false, 'error')
       }
     })
   }, [])
@@ -318,7 +316,13 @@ function ConversationCard(props) {
         }
       }
     } else {
-      port.postMessage({ session, stop })
+      try {
+        port.postMessage({ session, stop })
+      } catch (e) {
+        setPort(Browser.runtime.connect())
+        setIsReady(true)
+        port.postMessage({ session, stop })
+      }
     }
   }
 
